@@ -24,19 +24,65 @@ public class Exercise31 {
             int option = scanner.nextInt();
             
             switch (option) {
-                default -> System.out.println("Ação inválida");
                 case 0 -> System.exit(0);
                 case 1 -> checkBalance(bankAccount);
                 case 2 -> checkOverDraft(bankAccount);
                 case 3 -> depositMoney(bankAccount);
+                case 4 -> withdrawMoney(bankAccount);
+                case 5 -> payBill(bankAccount);
+                case 6 -> verifyOverdraft(bankAccount);
+                default -> System.out.println("Ação inválida");
             }
-            
         }
+    }
+
+    private static void verifyOverdraft(BankAccount bankAccount) {
+        if (bankAccount.getBalance() > 0) {
+            System.out.println("Está usando cheque especial");
+        } else {
+            System.out.println("Está usando saldo");
+        }
+    }
+
+    private static void payBill(BankAccount bankAccount) {
+        System.out.print("Insira o valor do boleto: R$ ");
+        double bill = scanner.nextDouble();
+        if (bill < 0) bill = 0;
+        double balance = bankAccount.getBalance();
+        double overdraft = bankAccount.getOverdraft();
+        if (bill > balance) {
+            double diff = bill - balance;
+            balance = balance - bill + diff;
+            overdraft = overdraft - diff;
+        }
+        bankAccount.setBalance(balance);
+        bankAccount.setOverdraft(overdraft);
+    }
+
+    private static void withdrawMoney(BankAccount bankAccount) {
+        System.out.print("Insira quantia a sacar: R$ ");
+        double money = scanner.nextDouble();
+        if (money < 0) money = 0;
+        double balance = bankAccount.getBalance();
+        double overdraft = bankAccount.getOverdraft();
+        if (money > balance) {
+            double diff = money - balance;
+            balance = balance - money + diff;
+            overdraft = overdraft - diff;
+        }
+        bankAccount.setBalance(balance);
+        bankAccount.setOverdraft(overdraft);
     }
 
     private static void depositMoney(BankAccount bankAccount) {
         System.out.print("Insira quantia a depositar: R$ ");
         double money = scanner.nextDouble();
+        if (money < 0) money = 0;
+        if (bankAccount.getOverdraft() <= 0) {
+            money = money - money * 0.2;
+        }
+        bankAccount.setBalance(bankAccount.getBalance() + money);
+        bankAccount.setOverdraft(bankAccount.getOverdraft() + (money <= 500 ? 50 : money * 0.5));
     }
 
     private static void checkOverDraft(BankAccount bankAccount) {
