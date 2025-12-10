@@ -26,7 +26,7 @@ public class Exercise31 {
             switch (option) {
                 case 0 -> System.exit(0);
                 case 1 -> checkBalance(bankAccount);
-                case 2 -> checkOverDraft(bankAccount);
+                case 2 -> checkOverDraftLimit(bankAccount);
                 case 3 -> depositMoney(bankAccount);
                 case 4 -> withdrawMoney(bankAccount);
                 case 5 -> payBill(bankAccount);
@@ -37,59 +37,77 @@ public class Exercise31 {
     }
 
     private static void verifyOverdraft(BankAccount bankAccount) {
-        if (bankAccount.getBalance() > 0) {
-            System.out.println("Está usando cheque especial");
+        if (bankAccount.getBalance() < 0) {
+            System.out.printf("Está usando Cheque Especial. Valor usado R$ %.2f\n", bankAccount.getBalance());
         } else {
-            System.out.println("Está usando saldo");
+            System.out.println("Está usando o próprio Saldo");
         }
+        System.out.printf("Limite de Cheque Especial restante: R$ %.2f\n", bankAccount.getOverdraftRemaining());
     }
 
     private static void payBill(BankAccount bankAccount) {
         System.out.print("Insira o valor do boleto: R$ ");
-        double bill = scanner.nextDouble();
-        if (bill < 0) bill = 0;
-        double balance = bankAccount.getBalance();
-        double overdraft = bankAccount.getOverdraft();
-        if (bill > balance) {
-            double diff = bill - balance;
-            balance = balance - bill + diff;
-            overdraft = overdraft - diff;
+        if (scanner.hasNextDouble()) {
+            double bill = scanner.nextDouble();
+            if (bill <= 0) {
+                System.out.println("O valor do boleto deve ser positivo.");
+                return;
+            }
+
+            if (bankAccount.withdraw(bill)) {
+                System.out.printf("Pagamento de boleto de R$ %.2f realizado. Novo Saldo: R$ %.2f\n", bill, bankAccount.getBalance());
+            } else {
+                System.out.println("Transação negada. Saldo/Limite de Cheque Especial insuficiente para pagar o boleto.");
+            }
+        } else {
+            System.out.println("Entrada inválida.");
+            scanner.next();
         }
-        bankAccount.setBalance(balance);
-        bankAccount.setOverdraft(overdraft);
     }
 
     private static void withdrawMoney(BankAccount bankAccount) {
         System.out.print("Insira quantia a sacar: R$ ");
-        double money = scanner.nextDouble();
-        if (money < 0) money = 0;
-        double balance = bankAccount.getBalance();
-        double overdraft = bankAccount.getOverdraft();
-        if (money > balance) {
-            double diff = money - balance;
-            balance = balance - money + diff;
-            overdraft = overdraft - diff;
+        if (scanner.hasNextDouble()) {
+            double money = scanner.nextDouble();
+            if (money <= 0) {
+                System.out.println("O valor do saque deve ser positivo.");
+                return;
+            }
+
+            if (bankAccount.withdraw(money)) {
+                System.out.printf("Saque de R$ %.2f realizado. Novo Saldo: R$ %.2f\n", money, bankAccount.getBalance());
+            } else {
+                System.out.println("Transação negada. Saldo/Limite de Cheque Especial insuficiente.");
+            }
+        } else {
+            System.out.println("Entrada inválida.");
+            scanner.next();
         }
-        bankAccount.setBalance(balance);
-        bankAccount.setOverdraft(overdraft);
     }
 
     private static void depositMoney(BankAccount bankAccount) {
         System.out.print("Insira quantia a depositar: R$ ");
-        double money = scanner.nextDouble();
-        if (money < 0) money = 0;
-        if (bankAccount.getOverdraft() <= 0) {
-            money = money - money * 0.2;
+        if (scanner.hasNextDouble()) {
+            double money = scanner.nextDouble();
+            if (money <= 0) {
+                System.out.println("O valor do depósito deve ser positivo.");
+                return;
+            }
+
+            double currentBalance = bankAccount.deposit(money);
+            System.out.printf("Depósito de R$ %.2f realizado. Novo Saldo: R$ %.2f\n", money, currentBalance);
+        } else {
+            System.out.println("Entrada inválida.");
+            scanner.next();
         }
-        bankAccount.setBalance(bankAccount.getBalance() + money);
-        bankAccount.setOverdraft(bankAccount.getOverdraft() + (money <= 500 ? 50 : money * 0.5));
     }
 
-    private static void checkOverDraft(BankAccount bankAccount) {
-        System.out.println("Cheque especial atual: R$ " + bankAccount.getOverdraft());
+    private static void checkOverDraftLimit(BankAccount bankAccount) {
+        System.out.printf("Limite total do Cheque Especial: R$ %.2f", bankAccount.getOverdraftLimit());
     }
 
     private static void checkBalance(BankAccount bankAccount) {
-        System.out.println("Saldo atual: R$ " + bankAccount.getBalance());
+        System.out.printf("Saldo atual: R$ %.2f", bankAccount.getBalance());
+        System.out.printf("Valor disponível: R$ %.2f", bankAccount.getBalance() + bankAccount.getOverdraftRemaining());
     }
 }
