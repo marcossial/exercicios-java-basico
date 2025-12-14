@@ -1,15 +1,15 @@
 public class Exercise43 {
     public static void main(String[] args) {
-        Clock brazilianClock = new BrazilianClock(0, 20, 40);
-        System.out.println(brazilianClock);
+        Clock brazilianClock = new BrazilianClock(12, 0 , 1);
+        Clock americanClock = new AmericanClock(12, 0, 1);
 
-        Clock americanClock = new AmericanClock(14, 20, 40);
-        System.out.println(americanClock);
+        System.out.println("BR: " + brazilianClock);
+        System.out.println("US: " + americanClock);
 
-        americanClock.setTime(new BrazilianClock(12, 30, 0));
-        brazilianClock.setTime(new AmericanClock(15, 0, 20));
+        americanClock.setTime(brazilianClock);
+        brazilianClock.setTime(americanClock);
 
-        System.out.println(americanClock);
-        System.out.println(brazilianClock);
+        System.out.println("BR: " + brazilianClock);
+        System.out.println("US: " + americanClock);
     }
 }
