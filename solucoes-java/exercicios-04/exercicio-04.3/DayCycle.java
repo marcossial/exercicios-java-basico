@@ -1,4 +1,4 @@
 public enum DayCycle {
     AM,
-    PM;
+    PM
 }
